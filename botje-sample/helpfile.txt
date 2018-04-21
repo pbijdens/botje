@@ -1,0 +1,3 @@
+﻿This file is sent to the user as-is when they request help.
+
+It can contain <b>Telegram HTML markup</b> codes.

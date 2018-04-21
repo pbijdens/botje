@@ -263,3 +263,4 @@ __pycache__/
 Botje/PokemonRaidBot/settings.*.json
 Botje/PokemonRaidBot/build_release.bat
 Botje/PokemonRaidBot/Data/*
+/botje-sample/Properties/launchSettings.json
