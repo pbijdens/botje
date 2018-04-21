@@ -2,15 +2,27 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <Authors>Pieter-Bas IJdens</Authors>
+    <Company>25More</Company>
+    <Product>Botje</Product>
+    <Description>Telegram BOT API implementation for .NET Core</Description>
+    <PackageLicenseUrl>https://github.com/pbijdens/botje/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/pbijdens/botje</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pbijdens/botje.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>telegram bot api</PackageTags>
+    <AssemblyVersion>0.50.1804.21</AssemblyVersion>
+    <FileVersion>0.50.1804.21</FileVersion>
+    <Version>0.50.1804.21</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Botje.Messaging</PackageId>
+    <RootNamespace>Botje</RootNamespace>
+    <AssemblyName>Botje.Messaging</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Botje.Core\Botje.Core.csproj" />
-    <ProjectReference Include="..\Botje.DB\Botje.DB.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Ninject" Version="3.3.4" />
     <PackageReference Include="RestSharp.NetCore" Version="105.2.3" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
   </ItemGroup>

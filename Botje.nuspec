@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package >
+    <metadata>
+        <id>Botje</id>
+        <version>1.0.0</version>
+        <authors>Pieter-Bas IJdens</authors>
+        <owners>Pieter-Bas IJdens</owners>
+        <licenseUrl>https://github.com/pbijdens/botje/blob/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/pbijdens/botje</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>.NET Core package to create a Telegram Bot quickly</description>
+        <releaseNotes>Changes.</releaseNotes>
+        <copyright>Copyright 2018 Pieter-Bas IJdens</copyright>
+        <tags>telegram api</tags>
+        <dependencies>
+            <dependency id="Ninject" version="3.3.4" />
+            <dependency id="Newtonsoft.Json" version="11.0.2" />
+            <dependency id="RestSharp.NetCore" version="105.2.3" />
+        </dependencies>
+        <files>
+        </files>
+    </metadata>
+</package>
