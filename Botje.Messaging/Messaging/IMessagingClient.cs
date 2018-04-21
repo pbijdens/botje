@@ -132,5 +132,12 @@ namespace Botje.Messaging
         /// Gets the host/key combination.
         /// </summary>
         string FileBaseURL { get; }
+
+        /// <summary>
+        /// Gets information about a chat.
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <returns></returns>
+        Chat GetChat(long chatID);
     }
 }
