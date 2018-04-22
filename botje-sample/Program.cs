@@ -61,6 +61,8 @@ namespace Botje.Sample
             kernel.Bind<IConsoleCommand>().To<ConsoleCommands.MeCommand>().InSingletonScope();
 
             // Register the bot modules
+            kernel.Bind<IBotModule>().To<AnnounceAllMessages>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<DeleteMessage>().InSingletonScope();
             kernel.Bind<IBotModule>().To<WhereAmI>().InSingletonScope();
             kernel.Bind<IBotModule>().To<WhoAmI>().InSingletonScope();
 

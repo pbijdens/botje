@@ -20,7 +20,7 @@ namespace Botje.Messaging.Telegram
         private readonly TimeSpan AnswerCallbackQueryTimeout = TimeSpan.FromSeconds(5);
         private readonly TimeSpan EditMessageTextTimeout = TimeSpan.FromSeconds(30);
         private readonly TimeSpan AnswerInlineQueryTimeout = TimeSpan.FromSeconds(5);
-        private readonly TimeSpan ForwardMessageTimeout = TimeSpan.FromSeconds(5);
+        private readonly TimeSpan DefaultActionTimeout = TimeSpan.FromSeconds(5);
 #if DEBUG
         private readonly TimeSpan MessageProcessingTimeout = TimeSpan.FromHours(24);
 #else
@@ -529,7 +529,7 @@ namespace Botje.Messaging.Telegram
                 sem.Release();
             }
             );
-            if (!sem.WaitOne(ForwardMessageTimeout))
+            if (!sem.WaitOne(DefaultActionTimeout))
             {
                 string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
                 Log.Error(error);
@@ -626,7 +626,59 @@ namespace Botje.Messaging.Telegram
                 sw.Stop();
             }
             );
-            if (!sem.WaitOne(ForwardMessageTimeout))
+            if (!sem.WaitOne(DefaultActionTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+
+            return result;
+        }
+
+        private class DeleteMessageParams
+        {
+            public string chat_id { get; set; }
+            public long message_id { get; set; }
+        }
+
+        public bool DeleteMessage(long chatID, long messageID)
+        {
+            Log.Trace($"Invoked: DeleteMessage(chatID={chatID}, messageID={messageID})");
+
+            var request = new RestRequest("deleteMessage", Method.POST);
+
+            var parameters = new DeleteMessageParams
+            {
+                chat_id = $"{chatID}",
+                message_id = messageID
+            };
+            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
+            request.RequestFormat = DataFormat.Json;
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            bool result = default(bool);
+
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<bool>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method} ': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+                sw.Stop();
+            }
+            );
+            if (!sem.WaitOne(DefaultActionTimeout))
             {
                 string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
                 Log.Error(error);

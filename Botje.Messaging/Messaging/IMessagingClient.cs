@@ -122,6 +122,14 @@ namespace Botje.Messaging
         void ForwardMessageToChat(long chatID, long sourceChat, long sourceMessageID);
 
         /// <summary>
+        /// https://core.telegram.org/bots/api#deletemessage
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="messageID"></param>
+        /// <returns>true upon success</returns>
+        bool DeleteMessage(long chatID, long messageID);
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="fileID"></param>
