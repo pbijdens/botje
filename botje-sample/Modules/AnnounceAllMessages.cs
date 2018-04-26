@@ -59,7 +59,8 @@ namespace Botje.Sample.Modules
 
         private void ProcessMessage(Models.Message message)
         {
-            string announcement = $"MessageID={message.MessageID}, ChatID={message.Chat.ID}, ReplyToID={message.ReplyToMessage?.MessageID}, ForwardedMessage={message.ForwardFromMessageId}, FromID={message.From?.ID}, FromName={message.From?.UsernameOrName()}, Text={message.Text?.Substring(0, Math.Min(10, message.Text?.Length ?? 0))}";
+            if (message.From.IsBot) return; // not interested in bot messages
+            string announcement = $"MessageID={message.MessageID}, Type={message.Type}, ChatID={message.Chat.ID}, ReplyToID={message.ReplyToMessage?.MessageID}, ForwardedMessage={message.ForwardFromMessageId}, FromID={message.From?.ID}, FromName={message.From?.UsernameOrName()}, Text={message.Text?.Substring(0, Math.Min(20, message.Text?.Length ?? 0))}";
             _log.Trace(announcement);
             Client.SendMessageToChat(message.Chat.ID, announcement);
         }

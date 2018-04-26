@@ -66,13 +66,13 @@ namespace Botje.Messaging
         event EventHandler<PublicMessageEditedEventArgs> OnPublicMessageEdited;
 
         /// <summary>
-        /// Who is the bot?
+        /// https://core.telegram.org/bots/api#getme
         /// </summary>
         /// <returns></returns>
         User GetMe();
 
         /// <summary>
-        /// See TeleGram API documentation for sendMessage
+        /// https://core.telegram.org/bots/api#sendmessage
         /// </summary>
         /// <param name="chatID"></param>
         /// <param name="text"></param>
@@ -85,7 +85,7 @@ namespace Botje.Messaging
         Message SendMessageToChat(long chatID, string text, string parseMode = "HTML", bool? disableWebPagePreview = null, bool? disableNotification = null, long? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
 
         /// <summary>
-        /// See telegram API documentation
+        /// https://core.telegram.org/bots/api#answercallbackquery
         /// </summary>
         /// <param name="callbackQueryID"></param>
         /// <param name="text"></param>
@@ -94,7 +94,7 @@ namespace Botje.Messaging
         bool AnswerCallbackQuery(string callbackQueryID, string text = null, bool? showAlert = false);
 
         /// <summary>
-        /// See Telegram API documentation
+        /// https://core.telegram.org/bots/api#editmessagetext
         /// </summary>
         /// <param name="chatID"></param>
         /// <param name="messageID"></param>
@@ -107,14 +107,14 @@ namespace Botje.Messaging
         void EditMessageText(string chatID, long? messageID, string inlineMessageID, string text, string parseMode = null, bool? disableWebPagePreview = null, InlineKeyboardMarkup replyMarkup = null, string chatType = "private");
 
         /// <summary>
-        /// See Telegram API documentation
+        /// https://core.telegram.org/bots/api#answerinlinequery
         /// </summary>
         /// <param name="queryID"></param>
         /// <param name="results"></param>
         void AnswerInlineQuery(string queryID, List<InlineQueryResultArticle> results);
 
         /// <summary>
-        /// 
+        /// https://core.telegram.org/bots/api#forwardmessage
         /// </summary>
         /// <param name="chatID"></param>
         /// <param name="sourceChat"></param>
@@ -130,30 +130,46 @@ namespace Botje.Messaging
         bool DeleteMessage(long chatID, long messageID);
 
         /// <summary>
-        /// 
+        /// https://core.telegram.org/bots/api#getfile
         /// </summary>
         /// <param name="fileID"></param>
         /// <returns></returns>
         File GetFile(string fileID);
 
         /// <summary>
-        /// Gets the host/key combination.
+        /// Gets the host/key combination to be used as the base URL for file downloads.
         /// </summary>
         string FileBaseURL { get; }
 
         /// <summary>
-        /// Gets information about a chat.
+        /// https://core.telegram.org/bots/api#getchat
         /// </summary>
         /// <param name="chatID"></param>
         /// <returns></returns>
         Chat GetChat(long chatID);
 
         /// <summary>
-        /// Kicks the user from the chat. Use a unix timestamp to specify an until-date or time
+        /// https://core.telegram.org/bots/api#kickchatmember
         /// </summary>
         /// <param name="chatID"></param>
         /// <param name="userID"></param>
         /// <param name="untilDate"></param>
         void KickChatMember(long chatID, long userID, DateTimeOffset? untilDate);
+
+        /// <summary>
+        /// https://core.telegram.org/bots/api#senddocument
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="document"></param>
+        /// <param name="filename"></param>
+        /// <param name="contentType"></param>
+        /// <param name="contentLength"></param>
+        /// <param name="caption"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <returns></returns>
+        Message SendDocument(long chatID, System.IO.Stream document, string filename, string contentType, long contentLength, string caption, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
     }
 }

@@ -7,6 +7,7 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -496,7 +497,7 @@ namespace Botje.Messaging.Telegram
             public long message_id { get; set; }
         }
 
-        public void ForwardMessageToChat(long chatID, long sourceChat, long sourceMessageID)
+        public virtual void ForwardMessageToChat(long chatID, long sourceChat, long sourceMessageID)
         {
             Log.Trace($"Invoked: ForwardMessageToChat(chatID={chatID},sourceChat={sourceChat},sourceMessageID={sourceMessageID})");
 
@@ -543,11 +544,11 @@ namespace Botje.Messaging.Telegram
             public string file_id { get; set; }
         }
 
-        public virtual File GetFile(string fileID)
+        public virtual Models.File GetFile(string fileID)
         {
             Log.Trace($"Invoked: GetFile(fileID={fileID})");
 
-            File result = null;
+            Models.File result = null;
 
             var request = new RestRequest("getFile", Method.POST);
 
@@ -562,7 +563,7 @@ namespace Botje.Messaging.Telegram
             Stopwatch sw = new Stopwatch();
             sw.Start();
             Semaphore sem = new Semaphore(0, 1);
-            _restClient.ExecuteAsync<Result<File>>(request, (restResult) =>
+            _restClient.ExecuteAsync<Result<Models.File>>(request, (restResult) =>
             {
                 if (restResult.Data.OK)
                 {
@@ -591,7 +592,7 @@ namespace Botje.Messaging.Telegram
             public string chat_id { get; set; }
         }
 
-        public Chat GetChat(long chatID)
+        public virtual Chat GetChat(long chatID)
         {
             Log.Trace($"Invoked: GetChat(chatID={chatID}");
 
@@ -642,7 +643,7 @@ namespace Botje.Messaging.Telegram
             public long message_id { get; set; }
         }
 
-        public bool DeleteMessage(long chatID, long messageID)
+        public virtual bool DeleteMessage(long chatID, long messageID)
         {
             Log.Trace($"Invoked: DeleteMessage(chatID={chatID}, messageID={messageID})");
 
@@ -701,7 +702,7 @@ namespace Botje.Messaging.Telegram
         /// <param name="chatID"></param>
         /// <param name="userID"></param>
         /// <param name="untilDate"></param>
-        public void KickChatMember(long chatID, long userID, DateTimeOffset? untilDate)
+        public virtual void KickChatMember(long chatID, long userID, DateTimeOffset? untilDate)
         {
             Log.Trace($"Invoked: KickChatMember(chatID={chatID}, messageID={userID}, untilDate={untilDate})");
 
@@ -744,5 +745,70 @@ namespace Botje.Messaging.Telegram
             }
         }
 
+        private class SendDocumentRequest
+        {
+            public long chat_id { get; set; }
+            public string caption { get; set; }
+            public string parse_mode { get; set; }
+            public bool? disable_notification { get; set; }
+            public long? reply_to_message_id { get; set; }
+            public InlineKeyboardMarkup reply_markup { get; set; }
+        }
+
+        public virtual Message SendDocument(long chatID, Stream document, string filename, string contentType, long contentLength, string caption, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null)
+        {
+            Log.Trace($"Invoked: SendDocument(chatID={chatID},caption={caption},replyMarkup={replyMarkup})");
+
+            Message result = null;
+
+            var request = new RestRequest("sendDocument", Method.POST);
+
+            //var parameters = new SendDocumentRequest
+            //{
+            //    chat_id = chatID,
+            //    caption = caption,
+            //    parse_mode = parseMode,
+            //    disable_notification = disableNotification,
+            //    reply_to_message_id = replyToMessageId,
+            //    reply_markup = replyMarkup,
+            //};
+            //var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            //request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
+            //request.RequestFormat = DataFormat.Json;
+            request.AddParameter("chat_id", $"{chatID}");
+            request.AddParameter("caption", caption);
+            if (parseMode != null) request.AddParameter("parse_mode", parseMode);
+            if (disableNotification.HasValue) request.AddParameter("disable_notification", disableNotification);
+            if (replyToMessageId.HasValue) request.AddParameter("reply_to_message_id", replyToMessageId);
+            if (replyMarkup != null) request.AddParameter("reply_markup", replyMarkup);
+            request.AddFile("document", document.CopyTo, filename, contentLength, contentType);
+            request.AddHeader("Content-Type", "multipart/form-data");
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<Message>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method}': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+            }
+            );
+            if (!sem.WaitOne(SendMessageToChatTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+            sw.Stop();
+            return result;
+        }
     }
 }

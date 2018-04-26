@@ -66,6 +66,7 @@ namespace Botje.Sample
             kernel.Bind<IBotModule>().To<WhereAmI>().InSingletonScope();
             kernel.Bind<IBotModule>().To<WhoAmI>().InSingletonScope();
             kernel.Bind<IBotModule>().To<KickChatMember>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<SendDocument>().InSingletonScope();
 
             // Register API handlers
             var modules = kernel.GetAll<IBotModule>().ToList();
