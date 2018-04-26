@@ -687,5 +687,62 @@ namespace Botje.Messaging.Telegram
 
             return result;
         }
+
+        public class KickChatMemberParams
+        {
+            public string chat_id { get; set; }
+            public string user_id { get; set; }
+            public string until_date { get; set; }
+        }
+
+        /// <summary>
+        /// Kicks the user from the chat. Use a unix timestamp to specify an until-date or time
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="userID"></param>
+        /// <param name="untilDate"></param>
+        public void KickChatMember(long chatID, long userID, DateTimeOffset? untilDate)
+        {
+            Log.Trace($"Invoked: KickChatMember(chatID={chatID}, messageID={userID}, untilDate={untilDate})");
+
+            var request = new RestRequest("kickChatMember", Method.POST);
+
+            var parameters = new KickChatMemberParams
+            {
+                chat_id = $"{chatID}",
+                user_id = $"{userID}",
+                until_date = untilDate.HasValue ? $"{untilDate.Value.ToUnixTimeSeconds()}" : null,
+
+            };
+            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
+            request.RequestFormat = DataFormat.Json;
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<int>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method} ': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+                sw.Stop();
+            }
+            );
+            if (!sem.WaitOne(DefaultActionTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+        }
+
     }
 }

@@ -147,5 +147,13 @@ namespace Botje.Messaging
         /// <param name="chatID"></param>
         /// <returns></returns>
         Chat GetChat(long chatID);
+
+        /// <summary>
+        /// Kicks the user from the chat. Use a unix timestamp to specify an until-date or time
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="userID"></param>
+        /// <param name="untilDate"></param>
+        void KickChatMember(long chatID, long userID, DateTimeOffset? untilDate);
     }
 }
