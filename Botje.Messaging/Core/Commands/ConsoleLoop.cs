@@ -1,20 +1,27 @@
-﻿using Ninject;
+﻿using Botje.Core.Utils;
+using Ninject;
 using System;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Botje.Core.Commands
 {
     /// <summary>
+    /// Implementation of a non-blocking console reader loop.
     /// https://stackoverflow.com/questions/57615/how-to-add-a-timeout-to-console-readline
     /// </summary>
     public class ConsoleLoop
     {
+        /// <summary>
+        /// Injected list of commands.
+        /// </summary>
         [Inject]
         public IConsoleCommand[] Commands { get; set; }
 
+        /// <summary>
+        /// Injected logger factory.
+        /// </summary>
         [Inject]
         public ILoggerFactory LoggerFactory { set { _log = value.Create(GetType()); } }
 
@@ -139,8 +146,7 @@ namespace Botje.Core.Commands
 
         private (string command, string[] args) ParseCommandLine(string commandLine)
         {
-            var re = new Regex("(?<=\")[^\"]*(?=\")|[^\" ]+");
-            var strings = re.Matches(commandLine).Cast<Match>().Select(m => m.Value).ToArray();
+            var strings = CommandLineUtils.SplitArgs(commandLine ?? string.Empty);
             return (strings.FirstOrDefault(), strings.Skip(1).ToArray());
         }
     }

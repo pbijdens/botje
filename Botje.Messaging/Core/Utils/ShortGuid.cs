@@ -3,7 +3,9 @@
 namespace Botje.Core.Utils
 {
     /// <summary>
-    /// Wrapper for the GUID class, but with a different parse and tostring method.
+    /// Wrapper for the GUID class, but with a different parse and tostring method. The generated GUIds will be shorter than 
+    /// regular guids, simply because more characters are used. There is a 1:1 translation to regular guids. The result will
+    /// still be readable.
     /// </summary>
     public class ShortGuid
     {

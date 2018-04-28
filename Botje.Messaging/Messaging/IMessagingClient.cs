@@ -171,5 +171,40 @@ namespace Botje.Messaging
         /// <param name="replyMarkup"></param>
         /// <returns></returns>
         Message SendDocument(long chatID, System.IO.Stream document, string filename, string contentType, long contentLength, string caption, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
+
+        /// <summary>
+        /// https://core.telegram.org/bots/api#sendphoto
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="photo"></param>
+        /// <param name="filename"></param>
+        /// <param name="contentType"></param>
+        /// <param name="contentLength"></param>
+        /// <param name="caption"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <returns></returns>
+        Message SendPhoto(long chatID, System.IO.Stream photo, string filename, string contentType, long contentLength, string caption, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="audio"></param>
+        /// <param name="filename"></param>
+        /// <param name="contentType"></param>
+        /// <param name="contentLength"></param>
+        /// <param name="durationInSeconds"></param>
+        /// <param name="performer"></param>
+        /// <param name="title"></param>
+        /// <param name="caption"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <returns></returns>
+        Message SendAudio(long chatID, System.IO.Stream audio, string filename, string contentType, long contentLength, long? durationInSeconds = null, string performer = null, string title = null, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
     }
 }

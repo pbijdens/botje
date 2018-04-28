@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class ChosenInlineResult
+    /// <summary>
+    /// https://core.telegram.org/bots/api#choseninlineresult
+    /// </summary>
+    public class ChosenInlineResult : TelegramAPIObjectBase
     {
         //result_id String  The unique identifier for the result that was chosen
         [DeserializeAs(Name = "result_id")]

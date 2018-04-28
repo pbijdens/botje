@@ -1,4 +1,5 @@
 ﻿using Botje.Core;
+using Botje.Core.Utils;
 using Botje.Messaging;
 using Botje.Messaging.Events;
 using Ninject;
@@ -57,10 +58,12 @@ namespace Botje.Sample.Modules
             ProcessMessage(e.Message);
         }
 
+        protected readonly Func<string, string> _ = (s) => MessageUtils.HtmlEscape(s);
+
         private void ProcessMessage(Models.Message message)
         {
             if (message.From.IsBot) return; // not interested in bot messages
-            string announcement = $"MessageID={message.MessageID}, Type={message.Type}, ChatID={message.Chat.ID}, ReplyToID={message.ReplyToMessage?.MessageID}, ForwardedMessage={message.ForwardFromMessageId}, FromID={message.From?.ID}, FromName={message.From?.UsernameOrName()}, Text={message.Text?.Substring(0, Math.Min(20, message.Text?.Length ?? 0))}";
+            string announcement = "<b>Message: </b> " + _(message.ToString());
             _log.Trace(announcement);
             Client.SendMessageToChat(message.Chat.ID, announcement);
         }

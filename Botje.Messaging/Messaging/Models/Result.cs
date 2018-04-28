@@ -2,6 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
+    /// <summary>
+    /// Telegram API result class. All results conform to this interface.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class Result<T>
     {
         [DeserializeAs(Name = "ok")]
@@ -17,6 +21,10 @@ namespace Botje.Messaging.Models
         public T Data { get; set; }
     }
 
+    /// <summary>
+    /// Telegram API result class without result type. All void results conform to this interface.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class Result
     {
         [DeserializeAs(Name = "ok")]

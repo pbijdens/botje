@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class File
+    /// <summary>
+    /// https://core.telegram.org/bots/api#file
+    /// </summary>
+    public class File : TelegramAPIObjectBase
     {
         [DeserializeAs(Name = "file_id")] public string FileID { get; set; }
         [DeserializeAs(Name = "file_size")] public long FileSize { get; set; }

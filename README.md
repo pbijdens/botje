@@ -24,10 +24,6 @@ especially when editing many messages in a chnnel or public chat. It does this b
 your telegram bot updates the same message in a chat often. If you don't need this functionality, you can use the `TelegramClient` class directly. This will pass all requests
 to the telegram servers without any additional processing. It's the simplest, purest way to use the API.
 
-## Usage
-
-
-
 ## Documentation
 
 Would be nice.

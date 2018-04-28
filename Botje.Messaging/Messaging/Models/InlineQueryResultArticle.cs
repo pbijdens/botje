@@ -1,6 +1,10 @@
 ﻿namespace Botje.Messaging.Models
 {
-    public class InlineQueryResultArticle
+    /// <summary>
+    /// One of many possible inline query results: Represents a link to a webpage, but is also used to represent any message by simply not using the URL and thumbs.
+    /// https://core.telegram.org/bots/api#inlinequeryresultarticle
+    /// </summary>
+    public class InlineQueryResultArticle : TelegramAPIObjectBase
     {
         //type String  Type of the result, must be article
         public string type { get { return "article"; } set { } }

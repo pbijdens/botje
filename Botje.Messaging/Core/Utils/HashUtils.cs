@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Botje.Core.Utils
 {
+    /// <summary>
+    /// Helpers for calculating hashes. Useful for detecting duplicate messages or storing anonynous user data.
+    /// </summary>
     public static class HashUtils
     {
         /// <summary>

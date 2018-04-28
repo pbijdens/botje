@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class Venue
+    /// <summary>
+    /// https://core.telegram.org/bots/api#venue
+    /// </summary>
+    public class Venue : TelegramAPIObjectBase
     {
         [DeserializeAs(Name = "location")] public Location Location { get; set; }
         [DeserializeAs(Name = "title")] public string Title { get; set; }

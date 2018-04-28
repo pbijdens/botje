@@ -20,19 +20,8 @@ namespace Botje.Sample.Modules
         private void CmdWhereAmI(long chatID)
         {
             Models.Chat chat = Client.GetChat(chatID);
-            Client.SendMessageToChat(chatID, $"<b>Chat properties:</b> "
-                + $"\n - ID = {chat.ID}"
-                + $"\n - Description = {chat.Description}"
-                + $"\n - Username = {chat.Username}"
-                + $"\n - FirstName = {chat.FirstName}"
-                + $"\n - LastName = {chat.LastName}"
-                + $"\n - InviteLink = {chat.InviteLink}"
-                + $"\n - PinnedMessage.ID = {chat.PinnedMessage?.MessageID}"
-                + $"\n - PinnedMessage.Text = {chat.PinnedMessage?.Text}"
-                + $"\n - Title = {chat.Title}"
-                + $"\n - AllMembersAreAdministrators = {chat.AllMembersAreAdministrators}"
-                + $"\n - Type = {chat.Type}"
-                );
+            Client.SendMessageToChat(chatID, $"<b>Chat:</b> " + _(chat.ToString()));
+
         }
     }
 }

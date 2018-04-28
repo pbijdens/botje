@@ -8,6 +8,9 @@ namespace Botje.Core.Commands
     /// </summary>
     public class LogLevelCommand : ConsoleCommandBase
     {
+        /// <summary>
+        /// Command info.
+        /// </summary>
         public override CommandInfo Info => new CommandInfo
         {
             Command = "loglevel",
@@ -16,6 +19,12 @@ namespace Botje.Core.Commands
             DetailedHelp = "Usage: loglevel <all|trace|info|warn|error|none>\nUpdates the loglevel."
         };
 
+        /// <summary>
+        /// See CommandInfo for help.
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public override bool OnInput(string command, string[] args)
         {
             if (args.Length != 1) return false;

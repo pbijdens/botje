@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class MaskPosition
+    /// <summary>
+    /// https://core.telegram.org/bots/api#maskposition
+    /// </summary>
+    public class MaskPosition : TelegramAPIObjectBase
     {
         [DeserializeAs(Name = "point")] public string Point { get; set; }
         [DeserializeAs(Name = "x_shift")] public double XShift { get; set; }

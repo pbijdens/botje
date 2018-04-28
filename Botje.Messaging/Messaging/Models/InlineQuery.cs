@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class InlineQuery
+    /// <summary>
+    /// https://core.telegram.org/bots/api#inlinequery
+    /// </summary>
+    public class InlineQuery : TelegramAPIObjectBase
     {
         //id String  Unique identifier for this query
         [DeserializeAs(Name = "id")]

@@ -7,7 +7,7 @@ using System.Linq;
 namespace Botje.Messaging.PrivateConversation
 {
     /// <summary>
-    /// Simple implementation for maintaining conversation state.
+    /// Simple implementation for maintaining conversation state. Requires the Botje.DB to be present and initialized.
     /// </summary>
     public class PrivateConversationManager : IPrivateConversationManager
     {

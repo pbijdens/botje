@@ -3,7 +3,7 @@
 namespace Botje.Core.Commands
 {
     /// <summary>
-    /// Command information
+    /// Command information structure. Used for building console command lists for the Telegram bot wraper.
     /// </summary>
     public class CommandInfo
     {

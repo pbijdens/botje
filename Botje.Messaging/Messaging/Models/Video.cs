@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class Video
+    /// <summary>
+    /// https://core.telegram.org/bots/api#video
+    /// </summary>
+    public class Video : TelegramAPIObjectBase
     {
         [DeserializeAs(Name = "file_id")] public string FileID { get; set; }
         [DeserializeAs(Name = "width")] public int Width { get; set; }

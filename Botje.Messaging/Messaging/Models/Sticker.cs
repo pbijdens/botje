@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class Sticker
+    /// <summary>
+    /// https://core.telegram.org/bots/api#sticker
+    /// </summary>
+    public class Sticker : TelegramAPIObjectBase
     {
         [DeserializeAs(Name = "file_id")] public string FileID { get; set; }
         [DeserializeAs(Name = "width")] public int Width { get; set; }

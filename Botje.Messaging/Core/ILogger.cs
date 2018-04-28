@@ -36,6 +36,10 @@ namespace Botje.Core
         /// <param name="text"></param>
         void Error(Exception ex, string text);
 
+        /// <summary>
+        /// Sets the level at which logging information is to be reported. Up to the implementation to deal with this (or not).
+        /// </summary>
+        /// <param name="level"></param>
         void SetLevel(LogLevel level);
     }
 }

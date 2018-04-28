@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class MessageEntity
+    /// <summary>
+    /// https://core.telegram.org/bots/api#messageentity
+    /// </summary>
+    public class MessageEntity : TelegramAPIObjectBase
     {
         // type	String	Type of the entity. Can be mention (@username), hashtag, bot_command, url, email, bold (bold text), italic (italic text), code (monowidth string), pre (monowidth block), text_link (for clickable text URLs), text_mention (for users without usernames)
         [DeserializeAs(Name = "type")]

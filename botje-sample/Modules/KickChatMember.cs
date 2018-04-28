@@ -35,12 +35,12 @@ namespace Botje.Sample.Modules
                 else
                 {
                     Client.KickChatMember(message.Chat.ID, userID, DateTimeOffset.UtcNow + TimeSpan.FromHours(1));
-                    Client.SendMessageToChat(message.Chat.ID, $"@{MessageUtils.HtmlEscape(message.From.UsernameOrName())} kicked the user...", "HTML", null, null, message.MessageID);
+                    Client.SendMessageToChat(message.Chat.ID, $"@{_(message.From.UsernameOrName())} kicked the user...", "HTML", null, null, message.MessageID);
                 }
             }
             else
             {
-                Client.SendMessageToChat(message.Chat.ID, $"@{MessageUtils.HtmlEscape(message.From.UsernameOrName())} who?!? why?!?", "HTML", null, null, message.MessageID);
+                Client.SendMessageToChat(message.Chat.ID, $"@{_(message.From.UsernameOrName())} who?!? why?!?", "HTML", null, null, message.MessageID);
             }
         }
     }

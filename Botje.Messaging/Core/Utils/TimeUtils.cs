@@ -7,6 +7,7 @@ namespace Botje.Core.Utils
 {
     /// <summary>
     /// Helpers for working with time.
+    /// TODO: Move all string methods specific to the dutch language and locale to the bots that use them.
     /// </summary>
     public static class TimeUtils
     {

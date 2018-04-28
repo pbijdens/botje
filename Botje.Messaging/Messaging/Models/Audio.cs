@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class Audio
+    /// <summary>
+    /// https://core.telegram.org/bots/api#audio
+    /// </summary>
+    public class Audio : TelegramAPIObjectBase
     {
         [DeserializeAs(Name = "file_id")] public string FileID { get; set; }
         [DeserializeAs(Name = "duration")] public int DurationInSeconds { get; set; }

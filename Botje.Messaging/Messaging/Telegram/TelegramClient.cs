@@ -15,7 +15,6 @@ namespace Botje.Messaging.Telegram
 {
     public class TelegramClient : IMessagingClient
     {
-
         private readonly TimeSpan GetMeTimeout = TimeSpan.FromSeconds(5);
         private readonly TimeSpan SendMessageToChatTimeout = TimeSpan.FromSeconds(5);
         private readonly TimeSpan AnswerCallbackQueryTimeout = TimeSpan.FromSeconds(5);
@@ -52,6 +51,11 @@ namespace Botje.Messaging.Telegram
         protected ILogger Log;
         private RestClient _restClient;
         public String FileBaseURL { get; private set; }
+
+        private string APISerialize(object obj)
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(obj, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+        }
 
         public virtual void Setup(string key, CancellationToken cancellationToken)
         {
@@ -104,7 +108,7 @@ namespace Botje.Messaging.Telegram
                     {
                         if (null == result.Data)
                         {
-                            Log.Error($"Failed to parse:\r\n- {result.Content}\r\n- Request was: {result.Request.Resource}");
+                            Log.Error($"Failed to parse:\r\n---------------\r\n{result.Content}\r\n---------------\r\nRequest was: {result.Request.Resource}");
                         }
                         else if (result.Data.OK)
                         {
@@ -298,7 +302,7 @@ namespace Botje.Messaging.Telegram
                 reply_to_message_id = replyToMessageId,
                 reply_markup = replyMarkup,
             };
-            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            var jsonParams = APISerialize(parameters);
             request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
 
@@ -350,7 +354,7 @@ namespace Botje.Messaging.Telegram
                 show_alert = showAlert,
                 text = text,
             };
-            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            var jsonParams = APISerialize(parameters);
             request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
 
@@ -408,7 +412,7 @@ namespace Botje.Messaging.Telegram
                 disable_web_page_preview = disableWebPagePreview,
                 reply_markup = replyMarkup,
             };
-            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            var jsonParams = APISerialize(parameters);
             request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
 
@@ -461,7 +465,7 @@ namespace Botje.Messaging.Telegram
                 cache_time = 10,
                 is_personal = false,
             };
-            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            var jsonParams = APISerialize(parameters);
             request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
 
@@ -510,7 +514,7 @@ namespace Botje.Messaging.Telegram
                 disable_notification = null,
                 message_id = sourceMessageID
             };
-            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            var jsonParams = APISerialize(parameters);
             request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
 
@@ -556,7 +560,7 @@ namespace Botje.Messaging.Telegram
             {
                 file_id = fileID,
             };
-            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            var jsonParams = APISerialize(parameters);
             request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
 
@@ -602,7 +606,7 @@ namespace Botje.Messaging.Telegram
             {
                 chat_id = $"{chatID}",
             };
-            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            var jsonParams = APISerialize(parameters);
             request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
 
@@ -654,7 +658,7 @@ namespace Botje.Messaging.Telegram
                 chat_id = $"{chatID}",
                 message_id = messageID
             };
-            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            var jsonParams = APISerialize(parameters);
             request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
 
@@ -715,7 +719,7 @@ namespace Botje.Messaging.Telegram
                 until_date = untilDate.HasValue ? $"{untilDate.Value.ToUnixTimeSeconds()}" : null,
 
             };
-            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            var jsonParams = APISerialize(parameters);
             request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
 
@@ -745,16 +749,6 @@ namespace Botje.Messaging.Telegram
             }
         }
 
-        private class SendDocumentRequest
-        {
-            public long chat_id { get; set; }
-            public string caption { get; set; }
-            public string parse_mode { get; set; }
-            public bool? disable_notification { get; set; }
-            public long? reply_to_message_id { get; set; }
-            public InlineKeyboardMarkup reply_markup { get; set; }
-        }
-
         public virtual Message SendDocument(long chatID, Stream document, string filename, string contentType, long contentLength, string caption, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null)
         {
             Log.Trace($"Invoked: SendDocument(chatID={chatID},caption={caption},replyMarkup={replyMarkup})");
@@ -763,25 +757,105 @@ namespace Botje.Messaging.Telegram
 
             var request = new RestRequest("sendDocument", Method.POST);
 
-            //var parameters = new SendDocumentRequest
-            //{
-            //    chat_id = chatID,
-            //    caption = caption,
-            //    parse_mode = parseMode,
-            //    disable_notification = disableNotification,
-            //    reply_to_message_id = replyToMessageId,
-            //    reply_markup = replyMarkup,
-            //};
-            //var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
-            //request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
-            //request.RequestFormat = DataFormat.Json;
             request.AddParameter("chat_id", $"{chatID}");
             request.AddParameter("caption", caption);
             if (parseMode != null) request.AddParameter("parse_mode", parseMode);
             if (disableNotification.HasValue) request.AddParameter("disable_notification", disableNotification);
             if (replyToMessageId.HasValue) request.AddParameter("reply_to_message_id", replyToMessageId);
-            if (replyMarkup != null) request.AddParameter("reply_markup", replyMarkup);
+            if (replyMarkup != null) request.AddParameter("reply_markup", APISerialize(replyMarkup));
             request.AddFile("document", document.CopyTo, filename, contentLength, contentType);
+            request.AddHeader("Content-Type", "multipart/form-data");
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<Message>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method}': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+            }
+            );
+            if (!sem.WaitOne(SendMessageToChatTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+            sw.Stop();
+            return result;
+        }
+
+        public virtual Message SendPhoto(long chatID, Stream photo, string filename, string contentType, long contentLength, string caption, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null)
+        {
+            Log.Trace($"Invoked: SendPhoto(chatID={chatID},caption={caption},replyMarkup={replyMarkup})");
+
+            Message result = null;
+
+            var request = new RestRequest("sendPhoto", Method.POST);
+
+            request.AddParameter("chat_id", $"{chatID}");
+            request.AddParameter("caption", caption);
+            if (parseMode != null) request.AddParameter("parse_mode", parseMode);
+            if (disableNotification.HasValue) request.AddParameter("disable_notification", disableNotification);
+            if (replyToMessageId.HasValue) request.AddParameter("reply_to_message_id", replyToMessageId);
+            if (replyMarkup != null) request.AddParameter("reply_markup", APISerialize(replyMarkup));
+            request.AddFile("photo", photo.CopyTo, filename, contentLength, contentType);
+            request.AddHeader("Content-Type", "multipart/form-data");
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<Message>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method}': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+            }
+            );
+            if (!sem.WaitOne(SendMessageToChatTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+            sw.Stop();
+            return result;
+        }
+
+        public virtual Message SendAudio(long chatID, Stream audio, string filename, string contentType, long contentLength, long? durationInSeconds = null, string performer = null, string title = null, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null)
+        {
+            Log.Trace($"Invoked: SendPhoto(chatID={chatID},caption={caption},replyMarkup={replyMarkup})");
+
+            Message result = null;
+
+            var request = new RestRequest("sendAudio", Method.POST);
+
+            request.AddParameter("chat_id", $"{chatID}");
+            if (caption != null) request.AddParameter("caption", caption);
+            if (parseMode != null) request.AddParameter("parse_mode", parseMode);
+            if (disableNotification.HasValue) request.AddParameter("disable_notification", disableNotification);
+            if (replyToMessageId.HasValue) request.AddParameter("reply_to_message_id", replyToMessageId);
+            if (replyMarkup != null) request.AddParameter("reply_markup", APISerialize(replyMarkup));
+
+            if (durationInSeconds.HasValue) request.AddParameter("duration", durationInSeconds.Value);
+            if (performer != null) request.AddParameter("performer", performer);
+            if (title != null) request.AddParameter("title", title);
+            request.AddFile("audio", audio.CopyTo, filename, contentLength, contentType);
             request.AddHeader("Content-Type", "multipart/form-data");
 
             Stopwatch sw = new Stopwatch();

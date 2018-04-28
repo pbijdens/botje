@@ -1,6 +1,9 @@
 ﻿namespace Botje.Messaging.Models
 {
-    public class InputMessageContent
+    /// <summary>
+    /// https://core.telegram.org/bots/api#inputmessagecontent
+    /// </summary>
+    public class InputMessageContent : TelegramAPIObjectBase
     {
         public string message_text { get; set; }
         public string parse_mode { get; set; }

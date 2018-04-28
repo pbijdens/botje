@@ -2,6 +2,9 @@
 
 namespace Botje.Core
 {
+    /// <summary>
+    /// Interface for classes that create logger objects.
+    /// </summary>
     public interface ILoggerFactory
     {
         /// <summary>

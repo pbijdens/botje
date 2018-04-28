@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class User
+    /// <summary>
+    /// https://core.telegram.org/bots/api#user
+    /// </summary>
+    public class User : TelegramAPIObjectBase
     {
         //id Integer Unique identifier for this user or bot
         [DeserializeAs(Name = "id")]
@@ -28,11 +31,10 @@ namespace Botje.Messaging.Models
         [DeserializeAs(Name = "language_code")]
         public string LanguageCode { get; set; }
 
-        public override string ToString()
-        {
-            return $"User(Username=\"{Username}\", FirstName=\"{FirstName}\", LastName=\"{LastName}\", IsBot=\"{IsBot}\")";
-        }
-
+        /// <summary>
+        /// Display name.
+        /// </summary>
+        /// <returns></returns>
         public string DisplayName()
         {
             string result = $"{Username}";
@@ -47,6 +49,10 @@ namespace Botje.Messaging.Models
             return result;
         }
 
+        /// <summary>
+        /// If a username is set, return that. Otherwise return the display name. In case of bots indicates that in the result.
+        /// </summary>
+        /// <returns></returns>
         public string UsernameOrName()
         {
             string result = $"{Username}";
@@ -61,6 +67,10 @@ namespace Botje.Messaging.Models
             return result;
         }
 
+        /// <summary>
+        /// If a username is set, return that. Otherwise return the display name.
+        /// </summary>
+        /// <returns></returns>
         public string ShortName()
         {
             if (!string.IsNullOrWhiteSpace(Username)) return Username;

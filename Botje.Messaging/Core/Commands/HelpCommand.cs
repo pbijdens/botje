@@ -5,13 +5,16 @@ using System.Linq;
 namespace Botje.Core.Commands
 {
     /// <summary>
-    /// When a user requests help...
+    /// Automatically generates a help message for the user based on the registered console commands.
     /// </summary>
     public class HelpCommand : ConsoleCommandBase
     {
         [Inject]
         public IConsoleCommand[] Commands { get; set; }
 
+        /// <summary>
+        /// Coimmand information.
+        /// </summary>
         public override CommandInfo Info => new CommandInfo
         {
             Command = "help",
@@ -20,6 +23,12 @@ namespace Botje.Core.Commands
             DetailedHelp = "Usage: help [command]\nWhen no command is pecified, shows a quick overview of all commands. When a command is specified explains the usage of that command."
         };
 
+        /// <summary>
+        /// See CommandInfo for help.
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public override bool OnInput(string command, string[] args)
         {
             if (args.Length >= 1)

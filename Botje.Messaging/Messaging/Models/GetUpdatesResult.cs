@@ -2,7 +2,11 @@
 
 namespace Botje.Messaging.Models
 {
-    public class GetUpdatesResult
+    /// <summary>
+    /// https://core.telegram.org/bots/api#getting-updates
+    /// unnamed object that acts as the reult of the getUpdates call, webhook, etc.
+    /// </summary>
+    public class GetUpdatesResult : TelegramAPIObjectBase
     {
         [DeserializeAs(Name = "update_id")]
         public long UpdateID { get; set; }
@@ -39,5 +43,9 @@ namespace Botje.Messaging.Models
             if (null != CallbackQuery) return UpdateType.CallbackQuery;
             return UpdateType.Unsuported;
         }
+
+        // Not supported (bot API does not support any of the invoicing - shipping workflow yet).
+        // shipping_query	ShippingQuery	Optional. New incoming shipping query. Only for invoices with flexible price
+        // pre_checkout_query	PreCheckoutQuery	Optional. New incoming pre-checkout query. Contains full information about checkout
     }
 }

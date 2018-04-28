@@ -3,7 +3,8 @@
 namespace Botje.Core.Services
 {
     /// <summary>
-    /// Swervice to asynchronously translate a location to an address.
+    /// Service to asynchronously translate a location to an address.
+    /// TODO: Eliminate from the core and move to where it's used only.
     /// </summary>
     public interface ILocationToAddressService
     {

@@ -12,9 +12,8 @@ using System.Threading.Tasks;
 namespace Botje.Messaging.Services
 {
     /// <summary>
-    /// This class should of course not be part of the messaging library, but we'll allow it for now...
-    /// 
-    /// 
+    /// This class should of course not be part of the messaging library.
+    /// TODO: Move to the bot(s) where it's actually used.
     /// </summary>
     public class GoogleAddressService : ILocationToAddressService
     {

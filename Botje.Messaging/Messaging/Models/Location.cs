@@ -2,14 +2,15 @@
 
 namespace Botje.Messaging.Models
 {
-    public class Location
+    /// <summary>
+    /// https://core.telegram.org/bots/api#location
+    /// </summary>
+    public class Location : TelegramAPIObjectBase
     {
         // longitude Float   Longitude as defined by sender
-        [DeserializeAs(Name = "longitude")]
-        public float Longitude { get; set; }
+        [DeserializeAs(Name = "longitude")] public double Longitude { get; set; }
 
         // latitude    Float Latitude as defined by sender
-        [DeserializeAs(Name = "latitude")]
-        public float Latitude { get; set; }
+        [DeserializeAs(Name = "latitude")] public double Latitude { get; set; }
     }
 }

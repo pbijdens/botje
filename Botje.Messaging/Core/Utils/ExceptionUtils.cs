@@ -6,14 +6,14 @@ using System.Text;
 namespace Botje.Core.Utils
 {
     /// <summary>
-    /// 
+    /// Methods for helping the software deal with exceptions.
     /// </summary>
     public static class ExceptionUtils
     {
         private static string[] HiddenProperties = new string[] { "Data", "InnerException" };
 
         /// <summary>
-        /// 
+        /// Used for converting an exception to a usable string, including inner exceptions and custom data included in the exception.
         /// </summary>
         /// <param name="ex"></param>
         /// <returns></returns>

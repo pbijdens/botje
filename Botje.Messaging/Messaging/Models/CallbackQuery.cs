@@ -2,7 +2,10 @@
 
 namespace Botje.Messaging.Models
 {
-    public class CallbackQuery
+    /// <summary>
+    /// https://core.telegram.org/bots/api#callbackquery
+    /// </summary>
+    public class CallbackQuery : TelegramAPIObjectBase
     {
         [DeserializeAs(Name = "id")]
         public string ID { get; set; }

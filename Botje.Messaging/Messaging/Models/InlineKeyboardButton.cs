@@ -1,6 +1,9 @@
 ﻿namespace Botje.Messaging.Models
 {
-    public class InlineKeyboardButton
+    /// <summary>
+    /// https://core.telegram.org/bots/api#inlinekeyboardbutton
+    /// </summary>
+    public class InlineKeyboardButton : TelegramAPIObjectBase
     {
         //text	String	Label text on the button
         public string text { get; set; }

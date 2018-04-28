@@ -4,6 +4,9 @@ using System;
 
 namespace Botje.Messaging.PrivateConversation
 {
+    /// <summary>
+    /// Model class representing the private conversation state of the user.
+    /// </summary>
     public class PrivateConversationState : IAtom
     {
         public Guid UniqueID { get; set; }

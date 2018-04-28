@@ -3,7 +3,14 @@ using System.Collections.Generic;
 
 namespace Botje.Messaging.Models
 {
-    public class Message
+    /// <summary>
+    /// https://core.telegram.org/bots/api#message
+    /// </summary>
+    /// <remarks>
+    /// Word on Chat ID migration: You will get TWO messages. One with Chat.ID set to the 'old' chat ID, and MigrateTochatID set to the new chat ID, and one with Chat.ID set to the NEW chat ID, and MigrateFromChatID set to the old chat ID. You can use either to pick up on this change.
+    /// In any case, be aware chat chat IDs are subject to change, specifically when converting to a supergroup. Do handle these messages if your logic relies on specific chat IDs. When handling both messages, be aware thay you really will get both.
+    /// </remarks>
+    public class Message : TelegramAPIObjectBase
     {
         public Message()
         {
@@ -118,17 +125,47 @@ namespace Botje.Messaging.Models
         [DeserializeAs(Name = "left_chat_member")]
         public User LeftChatMember { get; set; }
 
+        // migrate_to_chat_id Integer Optional.The group has been migrated to a supergroup with the specified identifier. This number may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
+        [DeserializeAs(Name = "migrate_to_chat_id")]
+        public long? MigrateToChatID { get; set; }
+
+        // migrate_from_chat_id Integer Optional.The supergroup has been migrated from a group with the specified identifier. This number may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
+        [DeserializeAs(Name = "migrate_from_chat_id")]
+        public long? MigrateFromChatID { get; set; }
+
+        // pinned_message Message Optional.Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it is itself a reply.
+        [DeserializeAs(Name = "pinned_message")]
+        public Message PinnedMessage { get; set; }
         // not supported for now because we don't need this
 
-        // new_chat_title String  Optional.A chat title was changed to this value
-        // new_chat_photo  Array of PhotoSize Optional.A chat photo was change to this value
         // delete_chat_photo   True Optional. Service message: the chat photo was deleted
+        [DeserializeAs(Name = "delete_chat_photo")]
+        public bool? DeleteChatPhoto { get; set; }
+
+        // new_chat_title String  Optional.A chat title was changed to this value
+        [DeserializeAs(Name = "new_chat_title")]
+        public string NewChatTitle { get; set; }
+
+        // new_chat_photo  Array of PhotoSize Optional.A chat photo was change to this value
+        [DeserializeAs(Name = "new_chat_photo")]
+        public List<PhotoSize> NewChatPhoto { get; set; }
+
+        // connected_website - String	Optional. The domain name of the website on which the user has logged in. More about Telegram Login »
+        [DeserializeAs(Name = "connected_website")]
+        public string ConnectedWebsite { get; set; }
+
         // group_chat_created  True Optional. Service message: the group has been created
+        [DeserializeAs(Name = "group_chat_created")]
+        public bool? GroupChatCreated { get; set; }
+
         // supergroup_chat_created True Optional. Service message: the supergroup has been created.This field can‘t be received in a message coming through updates, because bot can’t be a member of a supergroup when it is created.It can only be found in reply_to_message if someone replies to a very first message in a directly created supergroup.
+        [DeserializeAs(Name = "supergroup_chat_created")]
+        public bool? SupergroupChatCreated { get; set; }
+
         // channel_chat_created True    Optional.Service message: the channel has been created.This field can‘t be received in a message coming through updates, because bot can’t be a member of a channel when it is created.It can only be found in reply_to_message if someone replies to a very first message in a channel.
-        // migrate_to_chat_id Integer Optional.The group has been migrated to a supergroup with the specified identifier. This number may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
-        // migrate_from_chat_id Integer Optional.The supergroup has been migrated from a group with the specified identifier. This number may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
-        // pinned_message Message Optional.Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it is itself a reply.
+        [DeserializeAs(Name = "channel_chat_created")]
+        public bool? ChannelChatCreated { get; set; }
+
         // invoice Invoice Optional.Message is an invoice for a payment, information about the invoice. More about payments »
         // successful_payment SuccessfulPayment   Optional.Message is a service message about a successful payment, information about the payment. More about payments
 
@@ -144,6 +181,18 @@ namespace Botje.Messaging.Models
                 if (null != Location) return MessageType.Location;
                 if (null != Sticker) return MessageType.Sticker;
                 if (null != Text) return MessageType.TextMessage;
+                if (null != NewChatMembers) return MessageType.NewChatMembers;
+                if (null != LeftChatMember) return MessageType.LeftChatMember;
+                if (null != MigrateToChatID) return MessageType.MigrateTo;
+                if (null != MigrateFromChatID) return MessageType.MigrateFrom;
+                if (null != PinnedMessage) return MessageType.PinnedMessage;
+                if (null != DeleteChatPhoto) return MessageType.DeleteChatPhoto;
+                if (null != NewChatTitle) return MessageType.NewChatTitle;
+                if (null != NewChatPhoto) return MessageType.NewChatPhoto;
+                if (null != ConnectedWebsite) return MessageType.ConnectedWebsite;
+                if (null != GroupChatCreated) return MessageType.GroupChatCreated;
+                if (null != SupergroupChatCreated) return MessageType.SupergroupChatCreated;
+                if (null != ChannelChatCreated) return MessageType.ChannelChatCreated;
                 return MessageType.TextMessage;
             }
         }
