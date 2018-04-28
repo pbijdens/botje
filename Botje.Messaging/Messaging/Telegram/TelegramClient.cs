@@ -15,21 +15,20 @@ namespace Botje.Messaging.Telegram
 {
     public class TelegramClient : IMessagingClient
     {
-        private readonly TimeSpan GetMeTimeout = TimeSpan.FromSeconds(5);
+        // bot-invoked API calls
         private readonly TimeSpan SendMessageToChatTimeout = TimeSpan.FromSeconds(5);
+        private readonly TimeSpan SendMediaToChatTimeout = TimeSpan.FromSeconds(60);
         private readonly TimeSpan AnswerCallbackQueryTimeout = TimeSpan.FromSeconds(5);
         private readonly TimeSpan EditMessageTextTimeout = TimeSpan.FromSeconds(30);
         private readonly TimeSpan AnswerInlineQueryTimeout = TimeSpan.FromSeconds(5);
         private readonly TimeSpan DefaultActionTimeout = TimeSpan.FromSeconds(5);
-#if DEBUG
-        private readonly TimeSpan MessageProcessingTimeout = TimeSpan.FromHours(24);
-#else
-        private readonly TimeSpan MessageProcessingTimeout = TimeSpan.FromSeconds(37);
-#endif
 
+        // internal operations
+        private readonly TimeSpan MessageProcessingTimeout = TimeSpan.FromSeconds(37);
         private readonly TimeSpan MessageProcessingErrorFixedDelay = TimeSpan.FromMilliseconds(503);
         private readonly TimeSpan MessageProcessingMinimumPollingInterval = TimeSpan.FromMilliseconds(1009);
 
+        // event handlers (see interface documentation)
         public event EventHandler<PrivateMessageEventArgs> OnPrivateMessage;
         public event EventHandler<PublicMessageEventArgs> OnPublicMessage;
         public event EventHandler<InlineQueryEventArgs> OnInlineQuery;
@@ -39,6 +38,11 @@ namespace Botje.Messaging.Telegram
         public event EventHandler<ChannelMessageEventArgs> OnChannelMessage;
         public event EventHandler<ChosenInlineQueryResultEventArgs> OnChosenInlineQueryResult;
         public event EventHandler<ChannelMessageEditedEventArgs> OnChannelMessageEdited;
+
+        /// <summary>
+        /// Fale base URL is calculated from the BOT's API key and is used to download files using the partial URL from GetFile();
+        /// </summary>
+        public String FileBaseURL { get; private set; }
 
         [Inject]
         public ILoggerFactory LoggerFactory { set { Log = value.Create(GetType()); } }
@@ -50,7 +54,6 @@ namespace Botje.Messaging.Telegram
         private CancellationToken _cancellationToken;
         protected ILogger Log;
         private RestClient _restClient;
-        public String FileBaseURL { get; private set; }
 
         private string APISerialize(object obj)
         {
@@ -262,7 +265,7 @@ namespace Botje.Messaging.Telegram
                 }
                 sem.Release();
             });
-            if (!sem.WaitOne(GetMeTimeout))
+            if (!sem.WaitOne(DefaultActionTimeout))
             {
                 string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
                 Log.Error(error);
@@ -783,7 +786,7 @@ namespace Botje.Messaging.Telegram
                 sem.Release();
             }
             );
-            if (!sem.WaitOne(SendMessageToChatTimeout))
+            if (!sem.WaitOne(SendMediaToChatTimeout))
             {
                 string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
                 Log.Error(error);
@@ -827,7 +830,7 @@ namespace Botje.Messaging.Telegram
                 sem.Release();
             }
             );
-            if (!sem.WaitOne(SendMessageToChatTimeout))
+            if (!sem.WaitOne(SendMediaToChatTimeout))
             {
                 string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
                 Log.Error(error);
@@ -839,7 +842,7 @@ namespace Botje.Messaging.Telegram
 
         public virtual Message SendAudio(long chatID, Stream audio, string filename, string contentType, long contentLength, long? durationInSeconds = null, string performer = null, string title = null, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null)
         {
-            Log.Trace($"Invoked: SendPhoto(chatID={chatID},caption={caption},replyMarkup={replyMarkup})");
+            Log.Trace($"Invoked: SendAudio(chatID={chatID},caption={caption},replyMarkup={replyMarkup})");
 
             Message result = null;
 
@@ -875,7 +878,7 @@ namespace Botje.Messaging.Telegram
                 sem.Release();
             }
             );
-            if (!sem.WaitOne(SendMessageToChatTimeout))
+            if (!sem.WaitOne(SendMediaToChatTimeout))
             {
                 string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
                 Log.Error(error);
@@ -884,5 +887,254 @@ namespace Botje.Messaging.Telegram
             sw.Stop();
             return result;
         }
+
+        public virtual Message SendVideo(long chatID, Stream video, string filename, string contentType, long contentLength, long? durationInSeconds = null, long? width = null, long? height = null, bool? supportsStreaming = null, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null)
+        {
+            Log.Trace($"Invoked: SendVideo(chatID={chatID},caption={caption},replyMarkup={replyMarkup})");
+
+            Message result = null;
+
+            var request = new RestRequest("sendVideo", Method.POST);
+
+            request.AddParameter("chat_id", $"{chatID}");
+            if (caption != null) request.AddParameter("caption", caption);
+            if (parseMode != null) request.AddParameter("parse_mode", parseMode);
+            if (disableNotification.HasValue) request.AddParameter("disable_notification", disableNotification);
+            if (replyToMessageId.HasValue) request.AddParameter("reply_to_message_id", replyToMessageId);
+            if (replyMarkup != null) request.AddParameter("reply_markup", APISerialize(replyMarkup));
+
+            if (durationInSeconds.HasValue) request.AddParameter("duration", durationInSeconds.Value);
+            if (width.HasValue) request.AddParameter("width", width.Value);
+            if (height.HasValue) request.AddParameter("height", height.Value);
+            if (supportsStreaming.HasValue) request.AddParameter("supports_streaming", supportsStreaming.Value);
+            request.AddFile("video", video.CopyTo, filename, contentLength, contentType);
+            request.AddHeader("Content-Type", "multipart/form-data");
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<Message>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method}': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+            }
+            );
+            if (!sem.WaitOne(SendMediaToChatTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+            sw.Stop();
+            return result;
+        }
+
+        public virtual Message SendVoice(long chatID, Stream voice, string filename, string contentType, long contentLength, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null)
+        {
+            Log.Trace($"Invoked: SendVoice(chatID={chatID},caption={caption},replyMarkup={replyMarkup})");
+
+            Message result = null;
+
+            var request = new RestRequest("sendVoice", Method.POST);
+
+            request.AddParameter("chat_id", $"{chatID}");
+            if (caption != null) request.AddParameter("caption", caption);
+            if (parseMode != null) request.AddParameter("parse_mode", parseMode);
+            if (disableNotification.HasValue) request.AddParameter("disable_notification", disableNotification);
+            if (replyToMessageId.HasValue) request.AddParameter("reply_to_message_id", replyToMessageId);
+            if (replyMarkup != null) request.AddParameter("reply_markup", APISerialize(replyMarkup));
+
+            request.AddFile("voice", voice.CopyTo, filename, contentLength, contentType);
+            request.AddHeader("Content-Type", "multipart/form-data");
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<Message>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method}': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+            }
+            );
+            if (!sem.WaitOne(SendMediaToChatTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+            sw.Stop();
+            return result;
+        }
+
+        public virtual Message SendVideoNote(long chatID, Stream videoNote, string filename, string contentType, long contentLength, long? durationInSeconds = null, long? length = null, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null)
+        {
+            Log.Trace($"Invoked: SendVideoNote(chatID={chatID},caption={caption},replyMarkup={replyMarkup})");
+
+            Message result = null;
+
+            var request = new RestRequest("sendVideoNote", Method.POST);
+
+            request.AddParameter("chat_id", $"{chatID}");
+            if (caption != null) request.AddParameter("caption", caption);
+            if (parseMode != null) request.AddParameter("parse_mode", parseMode);
+            if (disableNotification.HasValue) request.AddParameter("disable_notification", disableNotification);
+            if (replyToMessageId.HasValue) request.AddParameter("reply_to_message_id", replyToMessageId);
+            if (replyMarkup != null) request.AddParameter("reply_markup", APISerialize(replyMarkup));
+
+            if (durationInSeconds.HasValue) request.AddParameter("duration", durationInSeconds.Value);
+            if (length.HasValue) request.AddParameter("length", length.Value);
+            request.AddFile("video_note", videoNote.CopyTo, filename, contentLength, contentType);
+            request.AddHeader("Content-Type", "multipart/form-data");
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<Message>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method}': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+            }
+            );
+            if (!sem.WaitOne(SendMediaToChatTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+            sw.Stop();
+            return result;
+        }
+
+        public virtual Message SendLocation(long chatID, double latitude, double longitude, int? livePeriodSeconds = null, bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null)
+        {
+            Log.Trace($"Invoked: SendLocation(chatID={chatID},latitude={latitude},longitude={longitude},livePeriod={livePeriodSeconds},replyMarkup={replyMarkup})");
+
+            Message result = null;
+
+            var request = new RestRequest("sendLocation", Method.POST);
+
+            request.AddParameter("chat_id", $"{chatID}");
+            request.AddParameter("latitude", $"{latitude}");
+            request.AddParameter("longitude", $"{longitude}");
+            if (livePeriodSeconds.HasValue) request.AddParameter("live_period", $"{Math.Max(60, livePeriodSeconds.Value)}");
+            if (disableNotification.HasValue) request.AddParameter("disable_notification", disableNotification);
+            if (replyToMessageId.HasValue) request.AddParameter("reply_to_message_id", replyToMessageId);
+            if (replyMarkup != null) request.AddParameter("reply_markup", APISerialize(replyMarkup));
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<Message>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method}': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+            }
+            );
+            if (!sem.WaitOne(SendMediaToChatTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+            sw.Stop();
+            return result;
+        }
+
+        public virtual bool LeaveChat(long chatID)
+        {
+            Log.Trace($"Invoked: LeaveChat(chatID={chatID})");
+
+            bool result = false;
+
+            var request = new RestRequest("leaveChat", Method.POST);
+
+            request.AddParameter("chat_id", $"{chatID}");
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<bool>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method}': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+            }
+            );
+            if (!sem.WaitOne(SendMediaToChatTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+            sw.Stop();
+            return result;
+        }
+
+        // Unsupported (prioritized):
+
+        // https://core.telegram.org/bots/api#sendmediagroup
+        // https://core.telegram.org/bots/api#exportchatinvitelink
+        // https://core.telegram.org/bots/api#getchatadministrators
+        // https://core.telegram.org/bots/api#getchatmemberscount
+        // https://core.telegram.org/bots/api#getchatmember
+        // https://core.telegram.org/bots/api#pinchatmessage
+        // https://core.telegram.org/bots/api#unpinchatmessage
+        // https://core.telegram.org/bots/api#editmessagelivelocation
+        // https://core.telegram.org/bots/api#stopmessagelivelocation
+        // https://core.telegram.org/bots/api#sendcontact
+        // https://core.telegram.org/bots/api#sendchataction
+        // https://core.telegram.org/bots/api#unbanchatmember
+        // https://core.telegram.org/bots/api#restrictchatmember
+        // https://core.telegram.org/bots/api#promotechatmember
+        // https://core.telegram.org/bots/api#setchatphoto
+        // https://core.telegram.org/bots/api#deletechatphoto
+        // https://core.telegram.org/bots/api#setchattitle
+        // https://core.telegram.org/bots/api#setchatdescription
+        // https://core.telegram.org/bots/api#getuserprofilephotos
+        // https://core.telegram.org/bots/api#setchatstickerset
+        // https://core.telegram.org/bots/api#deletechatstickerset
+        // https://core.telegram.org/bots/api#sendvenue
+
+
+
     }
 }

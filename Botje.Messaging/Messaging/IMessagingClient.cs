@@ -189,7 +189,7 @@ namespace Botje.Messaging
         Message SendPhoto(long chatID, System.IO.Stream photo, string filename, string contentType, long contentLength, string caption, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
 
         /// <summary>
-        /// 
+        /// https://core.telegram.org/bots/api#sendaudio
         /// </summary>
         /// <param name="chatID"></param>
         /// <param name="audio"></param>
@@ -206,5 +206,80 @@ namespace Botje.Messaging
         /// <param name="replyMarkup"></param>
         /// <returns></returns>
         Message SendAudio(long chatID, System.IO.Stream audio, string filename, string contentType, long contentLength, long? durationInSeconds = null, string performer = null, string title = null, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
+
+        /// <summary>
+        /// https://core.telegram.org/bots/api#sendvideo
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="video"></param>
+        /// <param name="filename"></param>
+        /// <param name="contentType"></param>
+        /// <param name="contentLength"></param>
+        /// <param name="durationInSeconds"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="supportsStreaming"></param>
+        /// <param name="caption"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <returns></returns>
+        Message SendVideo(long chatID, System.IO.Stream video, string filename, string contentType, long contentLength, long? durationInSeconds = null, long? width = null, long? height = null, bool? supportsStreaming = null, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
+
+        /// <summary>
+        /// https://core.telegram.org/bots/api#sendvoice
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="voice"></param>
+        /// <param name="filename"></param>
+        /// <param name="contentType"></param>
+        /// <param name="contentLength"></param>
+        /// <param name="caption"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <returns></returns>
+        Message SendVoice(long chatID, System.IO.Stream voice, string filename, string contentType, long contentLength, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
+
+        /// <summary>
+        /// https://core.telegram.org/bots/api#sendvideonote
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="videoNote"></param>
+        /// <param name="filename"></param>
+        /// <param name="contentType"></param>
+        /// <param name="contentLength"></param>
+        /// <param name="durationInSeconds"></param>
+        /// <param name="length"></param>
+        /// <param name=""></param>
+        /// <param name="caption"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <returns></returns>
+        Message SendVideoNote(long chatID, System.IO.Stream videoNote, string filename, string contentType, long contentLength, long? durationInSeconds = null, long? length = null, string caption = null, string parseMode = "HTML", bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
+
+        /// <summary>
+        /// https://core.telegram.org/bots/api#sendlocation
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <param name="livePeriodSeconds"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <returns></returns>
+        Message SendLocation(long chatID, double latitude, double longitude, int? livePeriodSeconds = null, bool? disableNotification = null, int? replyToMessageId = null, InlineKeyboardMarkup replyMarkup = null);
+
+        /// <summary>
+        /// https://core.telegram.org/bots/api#leavechat
+        /// </summary>
+        /// <param name="chatID"></param>
+        /// <returns></returns>
+        bool LeaveChat(long chatID);
     }
 }
