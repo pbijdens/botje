@@ -18,7 +18,10 @@
     <PackageId>Botje.Messaging</PackageId>
     <RootNamespace>Botje</RootNamespace>
     <AssemblyName>Botje.Messaging</AssemblyName>
-    <PackageReleaseNotes>Added KickChatMember support</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for almost all media send methods
+Added location support
+Fixed issue with incoming location parsing
+See project site for more information</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
