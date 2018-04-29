@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -7,11 +6,15 @@ namespace Botje.Core.Utils
 {
     /// <summary>
     /// Helpers for working with time.
-    /// TODO: Move all string methods specific to the dutch language and locale to the bots that use them.
     /// </summary>
     public static class TimeUtils
     {
         private static TimeZoneInfo _tzInfo;
+
+        /// <summary>
+        /// Returns the currently registered local user's timezone.
+        /// </summary>
+        public static TimeZoneInfo TzInfo { get { return _tzInfo; } }
 
         static TimeUtils()
         {
@@ -48,63 +51,6 @@ namespace Botje.Core.Utils
         public static DateTime ToUTC(DateTime localTime)
         {
             return TimeZoneInfo.ConvertTimeToUtc(localTime, _tzInfo);
-        }
-
-        /// <summary>
-        /// Convert a datetime to justa short time.
-        /// </summary>
-        /// <param name="utc"></param>
-        /// <returns></returns>
-        public static string AsShortTime(this DateTime utc)
-        {
-            DateTime converted = TimeZoneInfo.ConvertTimeFromUtc(utc, _tzInfo);
-            return converted.ToString("HH:mm");
-        }
-
-        public static string AsFullTime(this DateTime utc)
-        {
-            DateTime converted = TimeZoneInfo.ConvertTimeFromUtc(utc, _tzInfo);
-            return converted.ToString("HH:mm:ss.fff");
-        }
-
-        /// <summary>
-        /// Human readable timespan.
-        /// </summary>
-        /// <param name="ts"></param>
-        /// <returns></returns>
-        public static string AsReadableTimespan(this TimeSpan ts)
-        {
-            // formats and its cutoffs based on totalseconds
-            var cutoff = new SortedList<long, string> {
-               {60, "{3:S}" },
-               {60*60-1, "{2:M}, {3:S}"},
-               {60*60, "{1:H}"},
-               {24*60*60-1, "{1:H}, {2:M}"},
-               {24*60*60, "{0:D}"},
-               {Int64.MaxValue , "{0:D}, {1:H}"}
-             };
-
-            // find nearest best match
-            var find = cutoff.Keys.ToList().BinarySearch((long)ts.TotalSeconds);
-
-            // negative values indicate a nearest match
-            var near = find < 0 ? Math.Abs(find) - 1 : find;
-
-            // use custom formatter to get the string
-            return String.Format(new HMSFormatter(), cutoff[cutoff.Keys[near]], ts.Days, ts.Hours, ts.Minutes, ts.Seconds);
-        }
-
-        private static readonly string[] Maanden = new string[] { "januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december" };
-
-        public static string AsDutchString(DateTime dt)
-        {
-            return $"{dt.Day} {Maanden[dt.Month - 1]} {dt.ToString("HH:mm")}";
-        }
-
-        public static string AsLocalShortTime(DateTime dt)
-        {
-            DateTime converted = TimeZoneInfo.ConvertTimeFromUtc(dt, _tzInfo);
-            return dt.ToString("dd-MM-yy HH:mm");
         }
 
         public static TimeSpan ParseTimeSpan(string v)

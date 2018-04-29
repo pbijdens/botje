@@ -11,17 +11,14 @@
     <RepositoryUrl>https://github.com/pbijdens/botje.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>telegram bot api</PackageTags>
-    <AssemblyVersion>0.50.1804.28</AssemblyVersion>
-    <FileVersion>0.50.1804.28</FileVersion>
-    <Version>0.50.1804.28</Version>
+    <AssemblyVersion>0.50.1804.29</AssemblyVersion>
+    <FileVersion>0.50.1804.29</FileVersion>
+    <Version>0.50.1804.29</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Botje.Messaging</PackageId>
     <RootNamespace>Botje</RootNamespace>
     <AssemblyName>Botje.Messaging</AssemblyName>
-    <PackageReleaseNotes>Added support for almost all media send methods
-Added location support
-Fixed issue with incoming location parsing
-See project site for more information</PackageReleaseNotes>
+    <PackageReleaseNotes>Removed google location api and removed localized content</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
