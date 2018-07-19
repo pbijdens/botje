@@ -69,6 +69,7 @@ namespace Botje.Sample
             kernel.Bind<IBotModule>().To<SendMedia>().InSingletonScope();
             kernel.Bind<IBotModule>().To<SendLocation>().InSingletonScope();
             kernel.Bind<IBotModule>().To<Leave>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<Fail>().InSingletonScope();
 
             // Register API handlers
             var modules = kernel.GetAll<IBotModule>().ToList();

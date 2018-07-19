@@ -1,4 +1,5 @@
 ﻿using Botje.Core;
+using Botje.Core.Utils;
 using Botje.DB;
 using Botje.Messaging.Events;
 using Botje.Messaging.Models;
@@ -28,6 +29,14 @@ namespace Botje.Messaging.Telegram
         private readonly TimeSpan MessageProcessingErrorFixedDelay = TimeSpan.FromMilliseconds(503);
         private readonly TimeSpan MessageProcessingMinimumPollingInterval = TimeSpan.FromMilliseconds(1009);
 
+        private readonly TimeSpan SingleMessageProcessingDelay = TimeSpan.FromMilliseconds(10);
+        private readonly TimeSpan SingleMessageProcessingErrorDelay = TimeSpan.FromMilliseconds(500); // when an error occurs, wait
+
+        /// <summary>
+        /// Increase this number to re-try processing failed messages. Set it to 1 or lower to never retry.
+        /// </summary>
+        public static int SingleMessageProcessingMaxFailures = 1;
+
         // event handlers (see interface documentation)
         public event EventHandler<PrivateMessageEventArgs> OnPrivateMessage;
         public event EventHandler<PublicMessageEventArgs> OnPublicMessage;
@@ -51,6 +60,7 @@ namespace Botje.Messaging.Telegram
         public IDatabase Database { get; set; }
 
         private Thread _updateThread;
+        private Thread _processThread;
         private CancellationToken _cancellationToken;
         protected ILogger Log;
         private RestClient _restClient;
@@ -69,7 +79,7 @@ namespace Botje.Messaging.Telegram
 
         public virtual void Start()
         {
-            if (null != _updateThread)
+            if (null != _updateThread || null != _processThread)
             {
                 Log.Error($"Can't start the telegram client when it's already running.");
                 throw new InvalidOperationException($"An update thread is already running.");
@@ -79,17 +89,25 @@ namespace Botje.Messaging.Telegram
                 IsBackground = true
             };
             _updateThread.Start();
+
+            _processThread = new Thread(ProcessUpdatesThreadFunction)
+            {
+                IsBackground = true
+            };
+            _processThread.Start();
         }
 
         public virtual void Stop()
         {
-            if (null == _updateThread)
+            if (null == _updateThread || null == _processThread)
             {
                 Log.Error($"Can't stop the telegram client when it's not running.");
                 throw new InvalidOperationException($"The update thread is not running so it can't be stopped.");
             }
             _updateThread.Abort();
             _updateThread = null;
+            _processThread.Abort();
+            _processThread = null;
         }
 
         private void UpdateThreadFunction(object obj)
@@ -117,12 +135,14 @@ namespace Botje.Messaging.Telegram
                         {
                             if (result.Data.Data?.Count > 0)
                             {
-                                Log.Trace($"{request.Resource}/{request.Method} returned {result.Data.Data.Count} results in {sw.ElapsedMilliseconds} milliseconds");
+                                Log.Trace($"{request.Resource}/{request.Method} returned {result.Data.Data.Count} results after {sw.ElapsedMilliseconds} milliseconds");
                                 foreach (GetUpdatesResult update in result.Data.Data)
                                 {
-                                    ProcessUpdate(update);
+                                    var dbSet = Database.GetCollection<ClientUpdateQueueEntry>();
+                                    dbSet.Insert(new ClientUpdateQueueEntry { Update = update, UpdateDateTime = DateTime.UtcNow });
                                     RecordUpdateDone(update);
                                 }
+                                Log.Trace($"{request.Resource}/{request.Method} queued {result.Data.Data.Count} results after {sw.ElapsedMilliseconds} milliseconds");
                             }
                         }
                         else
@@ -154,6 +174,59 @@ namespace Botje.Messaging.Telegram
                 }
             }
         }
+
+        //                                     ProcessUpdate(update);
+
+        private void ProcessUpdatesThreadFunction(object obj)
+        {
+            while (!_cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var dbSet = Database.GetCollection<ClientUpdateQueueEntry>();
+                    var preferredEntry = dbSet.OrderBy(x => x.Update.UpdateID).Where(x => !x.Failed).FirstOrDefault();
+                    if (null != preferredEntry)
+                    {
+                        try
+                        {
+                            ProcessUpdate(preferredEntry.Update);
+                            dbSet.Delete(x => x.UniqueID == preferredEntry.UniqueID);
+                        }
+                        catch (Exception ex)
+                        {
+                            string errorString = $"{DateTime.UtcNow}: Failed to process message with update ID {preferredEntry.Update?.UpdateID}: {ExceptionUtils.AsString(ex)}";
+                            preferredEntry.NumberOfFailures++;
+                            preferredEntry.Errors.Add(errorString);
+
+                            if (preferredEntry.NumberOfFailures >= SingleMessageProcessingMaxFailures)
+                            {
+                                preferredEntry.Failed = true;
+                                Log.Error($"PERMANENT FAILURE: {errorString}");
+                            }
+                            else
+                            {
+                                Log.Warn($"Message processing failure attempt {preferredEntry.NumberOfFailures}/{SingleMessageProcessingMaxFailures}: {errorString}");
+                            }
+
+                            dbSet.Update(preferredEntry);
+
+                            Thread.Sleep(SingleMessageProcessingErrorDelay);
+                        }
+                    }
+                    Thread.Sleep(SingleMessageProcessingDelay);
+                }
+                catch (ThreadAbortException)
+                {
+                    Log.Trace($"Cancellation is requested. Stopping the process-thread.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"Uncaught exception in update thread.");
+                    Thread.Sleep(SingleMessageProcessingErrorDelay);
+                }
+            }
+        }
+
 
         private object _updateLock = new object();
 
@@ -239,6 +312,7 @@ namespace Botje.Messaging.Telegram
             catch (Exception ex)
             {
                 Log.Error(ex, $"Processing update with ID #{update.UpdateID} failed. Ignoring message.");
+                throw;
             }
         }
 

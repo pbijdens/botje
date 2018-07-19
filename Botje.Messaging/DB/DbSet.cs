@@ -112,6 +112,15 @@ namespace Botje.DB
         }
 
         /// <summary>
+        /// Return all objects in the dataset, ordered.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T> OrderBy<Tkey>(Func<T, Tkey> orderByFunction = null)
+        {
+            return Data.OrderBy(orderByFunction).Select(Clone);
+        }
+
+        /// <summary>
         /// Returns the number of objects in the dataset.
         /// </summary>
         /// <returns></returns>
